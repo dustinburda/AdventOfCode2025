@@ -1,34 +1,78 @@
-#include <iostream>
-#include <fstream>
+#include <cassert>
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <string>
 
-int solve_problem_one() {
-    std::ifstream input_file (std::filesystem::current_path().parent_path() / "input_files/problem1.txt");
+int mod(int a, int b) {
+    int mod = a % b;
+    if (mod < 0)
+        mod += b;
+
+    return mod;
+}
+
+int solve_problem_one(std::string filename) {
+    std::ifstream input_file (std::filesystem::current_path().parent_path() / ("input_files/" + filename + ".txt"));
 
     std::string line;
 
-    int start = 50;
+    int current_dial_val = 50;
     int num_times_zero = 0;
     while(std::getline(input_file, line)) {
-        int sign = 1;
-        if (line[0] == 'L')
-            sign = -1;
 
-        int rotation_count = std::stoi(line.substr(1, line.size() - 1));
-        start = (start + sign * rotation_count);
-        if (start < 0)
-            start += 100;
+        int rotation_count = (line[0] == 'L' ? -1 : 1) * std::stoi(line.substr(1, line.size() - 1));
 
-        start %= 100;
+        current_dial_val = mod(current_dial_val + rotation_count, 100);
 
-        if (start == 0)
+        if (current_dial_val == 0)
             num_times_zero++;
     }
 
     return num_times_zero;
 }
 
+int num_times_past_zero(int prev_dial_val, int current_dial_val){
+    int num_times_pass_zero = 0;
+    if (current_dial_val < 0) {
+        if (prev_dial_val != 0)
+            num_times_pass_zero = std::abs(current_dial_val / 100) + 1;
+        else
+            num_times_pass_zero = std::abs(current_dial_val / 100);
+    } else if (current_dial_val == 0) {
+        num_times_pass_zero = std::abs(current_dial_val / 100) + 1;
+    } else if(current_dial_val >= 100) {
+        num_times_pass_zero = std::abs(current_dial_val / 100);
+    }
+
+    return num_times_pass_zero;
+}
+
+int solve_problem_two(std::string filename) {
+    std::ifstream input_file (std::filesystem::current_path().parent_path() / ("input_files/" + filename + ".txt"));
+
+    std::string line;
+
+    int current_dial_val = 50;
+    int num_times_pass_zero = 0;
+    while(std::getline(input_file, line)) {
+        int rotation_count = (line[0] == 'L' ? -1 : 1) * std::stoi(line.substr(1, line.size() - 1));
+
+        num_times_pass_zero += num_times_past_zero(current_dial_val, current_dial_val + rotation_count);
+
+        current_dial_val = mod(current_dial_val + rotation_count, 100);
+    }
+
+    return num_times_pass_zero;
+}
+
 int main() {
-    int answer_problem_one = solve_problem_one();
+    assert(solve_problem_one("sample") == 3);
+    assert(solve_problem_two("sample") == 6);
+
+    int answer_problem_one = solve_problem_one("problem1");
+    int answer_problem_two = solve_problem_two("problem1");
+
+    std::cout << answer_problem_two << std::endl;
 
 }
