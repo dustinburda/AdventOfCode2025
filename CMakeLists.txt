@@ -3,4 +3,4 @@ project(AoC2025)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(AoC2025 main.cpp)
+add_executable(AoC2025 main.cpp Problem1.cpp)
